@@ -16,21 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.floofy.services.kanata.providers
+package dev.floofy.services.kanata.utils
 
-import dev.floofy.services.kanata.Kanata
-import dev.floofy.services.kanata.types.StatusPacket
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import kotlin.properties.ReadOnlyProperty
+import kotlin.reflect.KClass
+import kotlin.reflect.KProperty
 
-/**
- * Represents a provider class to post to any status page
- * services available.
- *
- * @param kanata The current server instance to send http requests as an example!
- */
-abstract class IProvider(val kanata: Kanata) {
-    /**
-     * Dispatch method to post to the statuspage based off the [StatusPacket.phase] change.
-     * @param packet The status packet to use.
-     */
-    abstract suspend fun dispatch(packet: StatusPacket)
+class SL4FJDelegate(private val kClass: KClass<*>): ReadOnlyProperty<Any, Logger> {
+    override fun getValue(thisRef: Any, property: KProperty<*>): Logger =
+        LoggerFactory.getLogger(kClass.java)
 }
+
+inline fun <reified T> logging(): SL4FJDelegate = SL4FJDelegate(T::class)

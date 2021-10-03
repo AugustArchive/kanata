@@ -17,3 +17,18 @@
  */
 
 package dev.floofy.services.kanata.data
+
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class KanataConfig(
+    val provider: ProviderConfig,
+    val port: Int = 22039,
+    val host: String? = null,
+    val dev: Boolean = false
+)
+
+@Serializable
+open class ProviderConfig(
+    val instatus: InstatusConfig? = null
+)

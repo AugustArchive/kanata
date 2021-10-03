@@ -17,3 +17,25 @@
  */
 
 package dev.floofy.services.kanata.data
+
+import com.charleskorn.kaml.Yaml
+import dev.floofy.services.kanata.utils.logging
+import java.io.File
+import kotlin.system.exitProcess
+
+object ConfigProvider {
+    private val logger by logging<ConfigProvider>()
+    lateinit var config: KanataConfig
+
+    fun load() {
+        logger.info("Loading configuration...")
+
+        val file = File("./config.yml")
+        try {
+            config = Yaml.default.decodeFromString(KanataConfig.serializer(), file.readText())
+        } catch (e: Exception) {
+            logger.error("Unknown exception has occured while serializing config:", e)
+            exitProcess(1)
+        }
+    }
+}

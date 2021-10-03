@@ -17,3 +17,32 @@
  */
 
 package dev.floofy.services.kanata
+
+import dev.floofy.services.kanata.utils.logging
+import java.io.File
+
+/**
+ * Bootstrap object to use when initializing Kanata.
+ */
+object Bootstrap {
+    private val logger by logging<Bootstrap>()
+
+    @JvmStatic
+    fun main(args: Array<String>) {
+        val banner = File("./assets/banner.txt")
+        val lines = banner.readText().split("\n")
+
+        for (line in lines) {
+            val print = line
+                .replace("{{VERSION}}", KanataInfo.VERSION)
+                .replace("{{COMMIT_HASH}}", KanataInfo.COMMIT_HASH)
+                .replace("{{BUILD_DATE}}", KanataInfo.BUILD_DATE)
+
+            println(print)
+        }
+
+        logger.info("Bootstrapping Kanata...")
+        val kanata = Kanata()
+        kanata.launch()
+    }
+}

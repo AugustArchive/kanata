@@ -17,3 +17,29 @@
  */
 
 package dev.floofy.services.kanata.data
+
+import kotlinx.serialization.Serializable
+
+/**
+ * Returns the configuration for using [Instatus](https://instatus.com)
+ */
+@Serializable
+data class InstatusConfig(
+    /**
+     * Returns a map of components by `pod: componentId` from Instatus. Kanata
+     * will print out the components by `component name -> component id` so you
+     * can configure this.
+     */
+    val components: Map<String, String> = mapOf(),
+
+    /**
+     * Returns the webhook URL to use, you can find more here:
+     * https://instatus.com/help/monitoring/custom-service-webhook
+     */
+    val webhookUrl: String? = null,
+
+    /**
+     * Returns the API key, this is required!
+     */
+    val apiKey: String
+)

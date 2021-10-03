@@ -113,7 +113,7 @@ spotless {
 }
 
 application {
-    mainClass.set("dev.floofy.discord.noel.Bootstrap")
+    mainClass.set("dev.floofy.services.kanata.Bootstrap")
     java {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -130,13 +130,13 @@ tasks {
     }
 
     named<ShadowJar>("shadowJar") {
-        archiveFileName.set("Noel.jar")
+        archiveFileName.set("Kanata.jar")
         mergeServiceFiles()
 
         manifest {
             attributes(mapOf(
                 "Manifest-Version" to "1.0.0",
-                "Main-Class" to "dev.floofy.discord.noel.Bootstrap"
+                "Main-Class" to "dev.floofy.services.kanata.Bootstrap"
             ))
         }
     }

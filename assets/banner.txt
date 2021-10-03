@@ -6,7 +6,7 @@
      #     #             ##    #             #     #
    #        #######    ##       #######      #      #######
 
-           ~ Kanata v{{VERSION}} ({{COMMIT_HASH}}) ~
-              - Build Date: {{BUILD_DATE}} -
-           - Released under the GPL-3.0 License -
-      ~ Report bugs here: https://github.com/auguwu/Kanata/issues ~
+> Kanata v{{VERSION}} ({{COMMIT_HASH}})
+> Build Date: {{BUILD_DATE}}
+> Released under the GPL-3.0 License
+> Report bugs here: https://github.com/auguwu/Kanata/issues

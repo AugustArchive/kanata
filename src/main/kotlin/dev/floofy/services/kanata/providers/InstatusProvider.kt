@@ -17,3 +17,10 @@
  */
 
 package dev.floofy.services.kanata.providers
+
+import dev.floofy.services.kanata.Kanata
+import dev.floofy.services.kanata.types.StatusPacket
+
+class InstatusProvider(kanata: Kanata): IProvider(kanata) {
+    override suspend fun dispatch(packet: StatusPacket) {}
+}

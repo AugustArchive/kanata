@@ -16,21 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.floofy.services.kanata.providers
+package dev.floofy.services.kanata
 
-import dev.floofy.services.kanata.Kanata
-import dev.floofy.services.kanata.types.StatusPacket
+import java.util.*
 
-/**
- * Represents a provider class to post to any status page
- * services available.
- *
- * @param kanata The current server instance to send http requests as an example!
- */
-abstract class IProvider(val kanata: Kanata) {
-    /**
-     * Dispatch method to post to the statuspage based off the [StatusPacket.phase] change.
-     * @param packet The status packet to use.
-     */
-    abstract suspend fun dispatch(packet: StatusPacket)
+object KanataInfo {
+    val VERSION: String
+    val COMMIT_HASH: String
+    val BUILD_DATE: String
+
+    init {
+        val stream = this::class.java.getResourceAsStream("/metadata.properties")
+        val props = Properties().apply { load(stream) }
+
+        VERSION = props.getProperty("app.version")
+        COMMIT_HASH = props.getProperty("app.commit")
+        BUILD_DATE = props.getProperty("app.build.date")
+    }
 }
