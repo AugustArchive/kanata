@@ -16,27 +16,4 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package dev.floofy.services.kanata.data
-
-import kotlinx.serialization.Serializable
-import java.lang.IllegalArgumentException
-
-@Serializable
-data class KanataConfig(
-    val provider: ProviderConfig,
-    val namespace: String,
-    val port: Int = 22039,
-    val host: String? = null,
-    val dev: Boolean = false
-) {
-    fun getProvider(): InstatusConfig {
-        if (provider.instatus != null) return provider.instatus
-
-        throw IllegalArgumentException("Provider is not supported is at this time.")
-    }
-}
-
-@Serializable
-open class ProviderConfig(
-    val instatus: InstatusConfig? = null
-)
+package dev.floofy.services.kanata.kubernetes

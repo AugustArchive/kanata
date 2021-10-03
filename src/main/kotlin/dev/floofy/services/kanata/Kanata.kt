@@ -42,17 +42,19 @@ class Kanata {
         engine {
             config {
                 followRedirects(true)
-                addInterceptor {
-                    val logger = LoggerFactory.getLogger("okhttp.interceptor.kanata.logging")
-                    val request = it.request()
-                    var response: okhttp3.Response
+                if (ConfigProvider.config.dev) {
+                    addInterceptor {
+                        val logger = LoggerFactory.getLogger("okhttp.interceptor.kanata.logging")
+                        val request = it.request()
+                        var response: okhttp3.Response
 
-                    val time = measureTimeMillis {
-                        response = it.proceed(request)
+                        val time = measureTimeMillis {
+                            response = it.proceed(request)
+                        }
+
+                        logger.info("${request.url} ${request.method} | ${response.code} - ${time}ms")
+                        response
                     }
-
-                    logger.info("${request.url} ${request.method} | ${response.code} - ${time}ms")
-                    response
                 }
             }
         }
@@ -69,7 +71,6 @@ class Kanata {
     fun launch() {
         logger.info("Kanata is now launching into space! \uD83D\uDE80")
 
-        ConfigProvider.load()
         val environment = applicationEngineEnvironment {
             this.developmentMode = ConfigProvider.config.dev
             this.log = LoggerFactory.getLogger("dev.floofy.services.kanata.ktor.KtorApp")
