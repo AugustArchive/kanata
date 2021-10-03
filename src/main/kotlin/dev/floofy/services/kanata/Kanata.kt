@@ -102,6 +102,7 @@ class Kanata {
 
         server = embeddedServer(Netty, environment)
         server.addShutdownHook {
+            logger.info("Shutting down Kanata...")
             httpClient.close()
         }
 
