@@ -1,9 +1,8 @@
-use std::collections::HashMap;
-
 use crate::config::KanataConfig;
 use k8s_openapi::api::core::v1::Pod;
 use kube::{api::ListParams, api::WatchEvent, Api, Client, ResourceExt};
 use rocket::futures::{StreamExt, TryStreamExt};
+use std::collections::HashMap;
 
 /// Represents a implementation of the Kubernetes client
 /// for Kanata.
@@ -12,8 +11,7 @@ pub struct Kubernetes {
     /// Returns a new [`KubernetesClient`](Client) to use for this struct.
     client: Client,
 
-    /// Returns the pod state in-memory,
-    /// might migrate to etcd/Redis.
+    /// Returns the pod state in-memory, might use etcd/Redis.
     pod_states: HashMap<String, String>,
 }
 
@@ -29,7 +27,6 @@ impl Kubernetes {
     pub async fn watch(&mut self, config: &KanataConfig) -> Result<(), kube::Error> {
         let kube = self.clone();
 
-        info!("kanata: thread creation successful, now watching over pods!");
         let api: Api<Pod> = Api::namespaced(kube.client, &config.ns);
         let list_params = ListParams::default();
         let mut pod_stream = api.watch(&list_params, "0").await?.boxed();
@@ -51,19 +48,33 @@ impl Kubernetes {
                     } else {
                         let old_phase = self.pod_states.get(&pod_name);
                         if old_phase.is_none() {
-                            warn!("Pod {} was cleaned from in-memory? (phase={})", pod.name(), phase);
+                            warn!(
+                                "Pod {} was cleaned from in-memory? (phase={})",
+                                pod.name(),
+                                phase
+                            );
                         } else {
                             let mut curr_phase = phase.clone();
                             let old = old_phase.unwrap();
 
                             if curr_phase.as_mut() != old {
-                                info!("Pod {} has their phase changed from {} => {}.", pod_name, old, curr_phase);
+                                info!(
+                                    "Pod {} has their phase changed from {} => {}.",
+                                    pod_name, old, curr_phase
+                                );
                                 self.pod_states.insert(pod_name, curr_phase);
 
                                 // now do bullshit logic here :D
                             }
                         }
                     }
+                }
+
+                WatchEvent::Deleted(pod) => {
+                    let name = pod.name();
+                    warn!("Pod {} was deleted, removing in-memory cache!", name);
+
+                    self.pod_states.remove_entry(&name);
                 }
 
                 _ => {}

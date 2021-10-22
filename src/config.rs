@@ -1,8 +1,7 @@
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use serde::{Deserialize, Serialize};
-
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct KanataConfig {
     /// Represents a [`HashMap`] of key-value pairs for the list
     /// of Instatus component IDs -> pod names. You are not required
