@@ -6,7 +6,6 @@ extern crate log;
 
 pub mod config;
 pub mod kube;
-pub mod metrics;
 pub mod version;
 
 use crate::{config::KanataConfig, kube::Kubernetes, version::VERSION};
