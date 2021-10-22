@@ -1,0 +1,93 @@
+name: Release towards Docker and GitHub releases
+on:
+  release:
+    types:
+      - published
+jobs:
+  build-windows:
+    runs-on: windows-2019
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+
+      - name: Build release
+        run: cargo build --release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: kanata-win_x64.exe
+          path: ${{ github.workspace }}/target/release/kanata.exe
+          retention-days: 1
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+
+      - name: Build release
+        run: cargo build --release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: kanata-linux_x64
+          path: ${{ github.workspace }}/target/release/kanata
+          retention-days: 1
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+
+      - name: Build release
+        run: cargo build --release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: kanata-macos_x64
+          path: ${{ github.workspace }}/target/release/kanata
+          retention-days: 1
+
+  publish:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        runtime:
+          - 'win-x64.exe'
+          - 'linux-x64'
+          - 'macos-x64'
+    steps:
+      - name: Build Docker image
+        run: chmod +x ./scripts/build-docker.sh && ./scripts/build-docker.sh
+
+      - name: Publish Docker image
+        run: chmod +x ./scripts/publish-docker.sh && ./scripts/publish-docker.sh
+
+      - name: Add artifacts to GitHub Releases
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          artifacts: 'kanata-${{ matrix.runtime }}'
+          tag: ${{ github.event.release.tag_name }}
