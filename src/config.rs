@@ -14,16 +14,16 @@ pub struct KanataConfig {
     ///     # `kanata list:components` to view a list of the components.
     ///     some_component_id: nino-prod
     /// ```
-    components: HashMap<String, String>,
+    pub(crate) components: HashMap<String, String>,
 
     /// Instatus developer key, you can retrieve it [`here`](https://instatus.com/app/developer)
-    key: String,
+    pub(crate) key: String,
 
     /// Returns the [webhook URL](https://instatus.com/help/monitoring/custom-service-webhook), if any. This will post to that endpoint
-    webhook_url: Option<String>,
+    pub(crate) webhook_url: Option<String>,
 
-    /// Returns the port to listen to.
-    port: Option<u8>,
+    /// Returns the namespace to use. This is required.
+    pub(crate) ns: String,
 }
 
 impl KanataConfig {

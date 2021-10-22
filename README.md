@@ -10,10 +10,16 @@ The name is inspired by one my favourite vtubers I like to watch, [Amane Kanata]
 
 ## 🖥️ Installation
 You can install Kanata using your own machine or with Docker! Kanata
-is meant supposed to be small, and easy to use. All you really need installed
-is Rust.
+is meant supposed to be small, and easy to use.
 
-I provide a Docker image over at [Docker Hub](https://hub.docker.com/-/noelware/kanata) if you want to run
+You need **Rust** and [etcd](https://github.com/etcd-io/etcd). At the moment, I am using
+
+```sh
+$ rustc --version
+# rustc 1.57.0-nightly (fdf65053e 2021-09-07)
+```
+
+I provide a Docker image over at [Docker Hub](https://hub.docker.com/-/noel/kanata) if you want to run
 Kanata in a Docker container.
 
 ### Docker
@@ -25,8 +31,8 @@ $ docker pull noelware/kanata:latest # you can also specify a version or commit 
 
 # 2. Run it!
 $ docker run -d -p <host>:22903 --name kanata --restart always \
-  -v /path/to/config:/app/noelware/kanata/config.yml \
-  noelware/kanata:latest # or specify the version / hash you used
+  -v /path/to/config:/app/noel/kanata/config.yml \
+  auguwu/kanata:latest # or specify the version / hash you used
 ```
 
 ### Git Repository

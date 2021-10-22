@@ -1,13 +1,13 @@
 [package]
 name = "kanata"
-version = "0.1.0"
+
+# check `version.json` for the version.
+version = "0.0.0"
 edition = "2021"
 authors = ["Noel <cutie@floofy.dev>"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-rocket = "0.5.0-rc.1"
+rocket = { version = "0.5.0-rc.1", default-features = false, features = ["json"] }
 kube = "0.61.0"
 kube-runtime = "0.61.0"
 k8s-openapi = { version = "0.13.1", default-features = false, features = ["v1_22"] }
@@ -16,3 +16,4 @@ pretty_env_logger = "0.4"
 serde_yaml = "0.8.21"
 serde = "1.0.130"
 tokio = "1.12.0"
+reqwest = "0.11.6"

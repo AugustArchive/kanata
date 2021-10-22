@@ -1,7 +1,4 @@
-use std::{
-    collections::HashMap,
-    thread::{spawn, JoinHandle},
-};
+use std::collections::HashMap;
 
 use crate::config::KanataConfig;
 use k8s_openapi::api::core::v1::Pod;
@@ -10,15 +7,14 @@ use rocket::futures::{StreamExt, TryStreamExt};
 
 /// Represents a implementation of the Kubernetes client
 /// for Kanata.
+#[derive(Clone)]
 pub struct Kubernetes {
     /// Returns a new [`KubernetesClient`](Client) to use for this struct.
     client: Client,
 
-    /// Returns a [`HashMap`](HashMap) of threads that this
-    /// struct is controlling. This map only exists
-    /// for pod memory / resource usage, since managing
-    /// pod phases should be stuck in the main thread.
-    threads: HashMap<i32, JoinHandle<()>>,
+    /// Returns the pod state in-memory,
+    /// might migrate to etcd/Redis.
+    pod_states: HashMap<String, String>,
 }
 
 impl Kubernetes {
@@ -26,30 +22,15 @@ impl Kubernetes {
         let client = Client::try_default().await?;
         Ok(Kubernetes {
             client,
-            threads: HashMap::new(),
+            pod_states: HashMap::new(),
         })
     }
 
-    pub async fn watch(mut self, _config: KanataConfig) -> Result<(), kube::Error> {
-        info!("kanata: now watching over pods and pod memory usage...");
-
-        self.threads.insert(
-            0,
-            spawn(move || {
-                info!("kanata: managing pod memory usage as handle id #0");
-            }),
-        );
-
-        info!("kanata: spawned thread 0 (POD-MEMORY), now spawning pod resource usage thread...");
-        self.threads.insert(
-            1,
-            spawn(move || {
-                info!("kanata: managing pod resource usage as handle id #1");
-            }),
-        );
+    pub async fn watch(&mut self, config: &KanataConfig) -> Result<(), kube::Error> {
+        let kube = self.clone();
 
         info!("kanata: thread creation successful, now watching over pods!");
-        let api: Api<Pod> = Api::namespaced(self.client, "august");
+        let api: Api<Pod> = Api::namespaced(kube.client, &config.ns);
         let list_params = ListParams::default();
         let mut pod_stream = api.watch(&list_params, "0").await?.boxed();
 
@@ -58,7 +39,31 @@ impl Kubernetes {
                 WatchEvent::Modified(pod) => {
                     let status = pod.status.as_ref().expect("status exists on pod :(");
                     let phase = status.phase.clone().unwrap_or_default();
-                    warn!("pod {} phase was set to {}.", pod.name(), phase);
+                    let pod_name = pod.name();
+
+                    if !self.pod_states.contains_key(&pod_name) {
+                        let name = pod_name.clone();
+
+                        self.pod_states.insert(pod_name, phase.clone());
+                        info!("Pod {} phase was set to {} (cached in-memory)", name, phase);
+
+                        // do logic here
+                    } else {
+                        let old_phase = self.pod_states.get(&pod_name);
+                        if old_phase.is_none() {
+                            warn!("Pod {} was cleaned from in-memory? (phase={})", pod.name(), phase);
+                        } else {
+                            let mut curr_phase = phase.clone();
+                            let old = old_phase.unwrap();
+
+                            if curr_phase.as_mut() != old {
+                                info!("Pod {} has their phase changed from {} => {}.", pod_name, old, curr_phase);
+                                self.pod_states.insert(pod_name, curr_phase);
+
+                                // now do bullshit logic here :D
+                            }
+                        }
+                    }
                 }
 
                 _ => {}

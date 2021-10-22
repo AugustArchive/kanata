@@ -5,18 +5,26 @@ extern crate log;
 pub mod config;
 pub mod kube;
 
+use std::env;
 use crate::{config::KanataConfig, kube::Kubernetes};
 
 #[tokio::main]
 async fn main() {
-    let _config = KanataConfig::new();
+    let cmd = env::args().collect::<Vec<_>>();
+    info!("{:?}", cmd);
+
+    let config = KanataConfig::new();
 
     // Setup logging
     pretty_env_logger::init();
     info!("initializing kubernetes client...");
 
-    let _k8s = Kubernetes::new()
+    let mut k8s = Kubernetes::new()
         .await
         .expect("unable to create kubernetes client. :<");
     info!("initialized k8s client, now watching over pods...");
+
+    loop {
+        k8s.watch(&config).await.expect("k8s: unable to watch.");
+    }
 }
