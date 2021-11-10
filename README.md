@@ -19,7 +19,7 @@ $ rustc --version
 # rustc 1.57.0-nightly (fdf65053e 2021-09-07)
 ```
 
-I provide a Docker image over at [Docker Hub](https://hub.docker.com/-/noel/kanata) if you want to run
+I provide a Docker image over at [Docker Hub](https://hub.docker.com/-/auguwu/kanata) if you want to run
 Kanata in a Docker container.
 
 ### Docker
@@ -27,7 +27,7 @@ All you really need to do is:
 
 ```shell
 # 1. Pull the image off of Docker Hub
-$ docker pull noelware/kanata:latest # you can also specify a version or commit hash
+$ docker pull auguwu/kanata:latest # you can also specify a version or commit hash
 
 # 2. Run it!
 $ docker run -d -p <host>:22903 --name kanata --restart always \

@@ -1,8 +1,8 @@
-use crate::config::KanataConfig;
+use crate::{config::KanataConfig};
 use k8s_openapi::api::core::v1::Pod;
 use kube::{api::ListParams, api::WatchEvent, Api, Client, ResourceExt};
 use rocket::futures::{StreamExt, TryStreamExt};
-use std::collections::HashMap;
+use std::{collections::HashMap};
 
 /// Represents a implementation of the Kubernetes client
 /// for Kanata.
@@ -13,23 +13,33 @@ pub struct Kubernetes {
 
     /// Returns the pod state in-memory, might use etcd/Redis.
     pod_states: HashMap<String, String>,
+
+    /// Returns the http client to use to request to Instatus.
+    requester: reqwest::Client
 }
 
 impl Kubernetes {
     pub async fn new() -> Result<Kubernetes, kube::Error> {
         let client = Client::try_default().await?;
+
         Ok(Kubernetes {
             client,
             pod_states: HashMap::new(),
+            requester: reqwest::Client::new()
         })
     }
 
     pub async fn watch(&mut self, config: &KanataConfig) -> Result<(), kube::Error> {
         let kube = self.clone();
-
         let api: Api<Pod> = Api::namespaced(kube.client, &config.ns);
+
+        info!("getting last resource version...");
         let list_params = ListParams::default();
-        let mut pod_stream = api.watch(&list_params, "0").await?.boxed();
+        let all_pods = api.list(&list_params).await?;
+        let last_version = all_pods.metadata.clone().resource_version.expect("kanata: resource version was not provided.");
+
+        info!("{} pods were found, last resource version was {}", all_pods.into_iter().len(), last_version);
+        let mut pod_stream = api.watch(&list_params, last_version.as_str()).await?.boxed();
 
         while let Some(status) = pod_stream.try_next().await? {
             match status {

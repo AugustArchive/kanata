@@ -1,6 +1,5 @@
-#![feature(thread_id_value)]
-
 extern crate pretty_env_logger;
+
 #[macro_use]
 extern crate log;
 
@@ -33,8 +32,8 @@ async fn main() {
     let k8s = Kubernetes::new()
         .await
         .expect("unable to create kubernetes client. :<");
-    info!("initialized k8s client, now watching over pods...");
 
+    info!("initialized k8s client, now watching over pods...");
     loop {
         k8s.clone()
             .watch(&config)

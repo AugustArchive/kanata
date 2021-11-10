@@ -1,4 +1,4 @@
-FROM rust:alpine AS builder
+FROM rust:latest AS builder
 
 ARG version="unknown"
 ARG commit_hash="unknown"
@@ -13,8 +13,8 @@ RUN cargo build --release
 
 FROM alpine:latest
 
-WORKDIR /app
-COPY --from=builder /kanata/build/target/release/kanata /app/kanata
+WORKDIR /app/kanata
+COPY --from=builder /kanata/build/target/release/kanata /app/kanata/kanata
 ENV RUST_LOG=info
 
-CMD ["/app/kanata"]
+CMD ["/app/kanata/kanata"]
