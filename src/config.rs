@@ -7,7 +7,7 @@ pub struct KanataConfig {
     /// of Instatus component IDs -> pod names. You are not required
     /// to include the random hash in the pod (if it is a deployment).
     ///
-    /// ```yml
+    /// ```yaml
     /// components:
     ///     # The component ID from instatus, you can also invoke
     ///     # `kanata list:components` to view a list of the components.
@@ -23,6 +23,19 @@ pub struct KanataConfig {
 
     /// Returns the namespace to use. This is required.
     pub(crate) ns: String,
+
+    /// Returns the etcd configuration.
+    pub(crate) etcd: EtcdConfig,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct EtcdConfig {
+    /// Returns a list of etcd nodes to connect to.
+    pub(crate) nodes: Vec<String>,
+
+    /// Enables authentication to connect to an etcd node. This
+    /// is fairly optional but recommended.
+    pub(crate) auth: Option<(String, String)>,
 }
 
 impl KanataConfig {
@@ -33,5 +46,11 @@ impl KanataConfig {
             .expect("kanata: unable to read `config.yml` file.");
 
         serde_yaml::from_str(&data).expect("kanata: unable to serialize `KanataConfig` from file.")
+    }
+}
+
+impl Default for KanataConfig {
+    fn default() -> Self {
+        Self::new()
     }
 }

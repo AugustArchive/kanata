@@ -1,8 +1,8 @@
-use crate::{config::KanataConfig};
+use crate::{config::KanataConfig, etcd::Etcd};
 use k8s_openapi::api::core::v1::Pod;
 use kube::{api::ListParams, api::WatchEvent, Api, Client, ResourceExt};
 use rocket::futures::{StreamExt, TryStreamExt};
-use std::{collections::HashMap};
+use std::collections::HashMap;
 
 /// Represents a implementation of the Kubernetes client
 /// for Kanata.
@@ -11,11 +11,12 @@ pub struct Kubernetes {
     /// Returns a new [`KubernetesClient`](Client) to use for this struct.
     client: Client,
 
-    /// Returns the pod state in-memory, might use etcd/Redis.
+    /// Returns the pod state in-memory, so when the stream closes,
+    /// this gets re-used but saved in Etcd.
     pod_states: HashMap<String, String>,
 
     /// Returns the http client to use to request to Instatus.
-    requester: reqwest::Client
+    requester: reqwest::Client,
 }
 
 impl Kubernetes {
@@ -25,22 +26,43 @@ impl Kubernetes {
         Ok(Kubernetes {
             client,
             pod_states: HashMap::new(),
-            requester: reqwest::Client::new()
+            requester: reqwest::Client::new(),
         })
     }
 
-    pub async fn watch(&mut self, config: &KanataConfig) -> Result<(), kube::Error> {
+    pub async fn watch(&mut self, config: &KanataConfig, etcd: &Etcd) -> Result<(), kube::Error> {
         let kube = self.clone();
         let api: Api<Pod> = Api::namespaced(kube.client, &config.ns);
 
         info!("getting last resource version...");
         let list_params = ListParams::default();
         let all_pods = api.list(&list_params).await?;
-        let last_version = all_pods.metadata.clone().resource_version.expect("kanata: resource version was not provided.");
+        let last_version = all_pods
+            .metadata
+            .clone()
+            .resource_version
+            .expect("kanata: resource version was not provided.");
 
-        info!("{} pods were found, last resource version was {}", all_pods.into_iter().len(), last_version);
-        let mut pod_stream = api.watch(&list_params, last_version.as_str()).await?.boxed();
+        info!(
+            "{} pods were found, last resource version was {}",
+            all_pods.into_iter().len(),
+            last_version
+        );
+        let mut pod_stream = api
+            .watch(&list_params, last_version.as_str())
+            .await?
+            .boxed();
 
+        info!("retrieving data from etcd...");
+        let etcd_cls = etcd.clone();
+        let pod_states = etcd_cls
+            .client
+            .clone()
+            .get("", None)
+            .await
+            .expect("unable to retrieve data from etcd");
+
+        println!("{:#?}", pod_states);
         while let Some(status) = pod_stream.try_next().await? {
             match status {
                 WatchEvent::Modified(pod) => {
@@ -91,6 +113,7 @@ impl Kubernetes {
             }
         }
 
+        info!("stream closed, storing old state in etcd...");
         Ok(())
     }
 }

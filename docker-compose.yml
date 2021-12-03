@@ -7,10 +7,7 @@ services:
     networks:
       - kanata
     volumes:
-      - type: bind
-        read_only: true
-        target: /app/kanata/config.yml
-        source: ./config.yml
+      - /run/media/noel/Storage/Projects/Misc/Rust/Kanata/config.yml:/app/kanata/config.yml:ro
 
   etcd0:
     image: quay.io/coreos/etcd
@@ -20,66 +17,48 @@ services:
       - etcd0_data:/etcd_data
     command:
       - etcd
-      - -name
-      - etcd0
-      - --data-dir
-      - /etcd_data
-      - -advertise-client-urls
-      - http://etcd0:2379
-      - -listen-client-urls
-      - http://0.0.0.0:2379
-      - -initial-advertise-peer-urls
-      - http://etcd0:2380
-      - -listen-peer-urls
-      - http://0.0.0.0:2380
-      - -initial-cluster
-      - etcd0=http://etcd0:2380,http://etcd1:2380,http://etcd2:2380
+      - --name=etcd0
+      - --data-dir=/etcd_data
+      - --advertise-client-urls=http://etcd0:2379
+      - --listen-client-urls=http://0.0.0.0:2379
+      - --initial-advertise-peer-urls=http://etcd0:2379
+      - --listen-peer-urls=http://0.0.0.0:2379
+      - --initial-cluster=etcd0=http://etcd0:2380,http://etcd1:2380,http://etcd2:2380
+      - --initial-cluster-state=new
 
   etcd1:
     image: quay.io/coreos/etcd
     ports:
-      - 2379
+      - 2380
     volumes:
-      - etcd0_data:/etcd_data
+      - etcd1_data:/etcd_data
     command:
       - etcd
-      - -name
-      - etcd1
-      - --data-dir
-      - /etcd_data
-      - -advertise-client-urls
-      - http://etcd1:2379
-      - -listen-client-urls
-      - http://0.0.0.0:2379
-      - -initial-advertise-peer-urls
-      - http://etcd1:2380
-      - -listen-peer-urls
-      - http://0.0.0.0:2380
-      - -initial-cluster
-      - etcd0=http://etcd0:2380,http://etcd1:2380,http://etcd2:2380
+      - --name=etcd0
+      - --data-dir=/etcd_data
+      - --advertise-client-urls=http://etcd1:2380
+      - --listen-client-urls=http://0.0.0.0:2380
+      - --initial-advertise-peer-urls=http://etcd1:2380
+      - --listen-peer-urls=http://0.0.0.0:2380
+      - --initial-cluster=etcd0=http://etcd0:2379,http://etcd1:2380,http://etcd2:2381
+      - --initial-cluster-state=new
 
   etcd2:
     image: quay.io/coreos/etcd
     ports:
-      - 2379
+      - 2381
     volumes:
-      - etcd0_data:/etcd_data
+      - etcd2_data:/etcd_data
     command:
       - etcd
-      - -name
-      - etcd2
-      - --data-dir
-      - /etcd_data
-      - -advertise-client-urls
-      - http://etcd2:2379
-      - -listen-client-urls
-      - http://0.0.0.0:2379
-      - -initial-advertise-peer-urls
-      - http://etcd2:2380
-      - -listen-peer-urls
-      - http://0.0.0.0:2380
-      - -initial-cluster
-      - etcd0=http://etcd0:2380,http://etcd1:2380,http://etcd2:2380
+      - --name=etcd0
+      - --data-dir=/etcd_data
+      - --advertise-client-urls=http://etcd2:2381
+      - --listen-client-urls=http://0.0.0.0:2381
+      - --initial-advertise-peer-urls=http://etcd2:2381
+      - --listen-peer-urls=http://0.0.0.0:2381
+      - --initial-cluster=etcd0=http://etcd0:2379,http://etcd1:2380,http://etcd2:2381
+      - --initial-cluster-state=new
 
 networks:
   kanata:
