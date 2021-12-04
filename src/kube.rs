@@ -41,12 +41,7 @@ impl Kubernetes {
         })
     }
 
-    pub async fn update_pod_state(
-        &mut self,
-        name: &String,
-        phase: String,
-        config: &KanataConfig,
-    ) {
+    pub async fn update_pod_state(&mut self, name: &String, phase: String, config: &KanataConfig) {
         let old_phase = self.pod_states.get(name);
 
         if let Some(old) = old_phase {
@@ -124,7 +119,27 @@ impl Kubernetes {
                 for (index, pod) in pod_tree.items.into_iter().enumerate() {
                     let metadata = pod.meta();
                     if let Some(name) = &metadata.name {
-                        info!("found pod {} from iter index #{}", name, index);
+                        info!(
+                            "found pod {} from iter index #{}, now comparing from etcd...",
+                            name, index
+                        );
+
+                        let etcd_state = current_state.kvs().iter();
+
+                        // TODO: actually compare
+                        let _found_item = etcd_state.filter(|kv| {
+                            let key = kv.key_str().unwrap_or("<unknown>");
+
+                            // If we can't get the value from `key`,
+                            // let's not do anything with it.
+                            if key == "unknown" {
+                                return false;
+                            }
+
+                            // compare the key to the name.
+                            // TODO: ask Ice to replace `-<random>-<random>` from pod.
+                            key == name
+                        });
                     } else {
                         info!(
                             "skipping on unknown pod (no name available) | index from iter: {}",
@@ -141,7 +156,7 @@ impl Kubernetes {
             }
 
             // Check the `first_run` property in Kubernetes struct
-            // on why we are making it falsy.
+            // on why we are making it false.
             self.disable_first_run();
         }
 
@@ -158,8 +173,7 @@ impl Kubernetes {
                     let phase = status.phase.clone().unwrap_or_default();
                     let pod_name = pod.name();
 
-                    self.update_pod_state(&pod_name, phase, config)
-                        .await;
+                    self.update_pod_state(&pod_name, phase, config).await;
                 }
 
                 WatchEvent::Deleted(pod) => {
@@ -174,9 +188,10 @@ impl Kubernetes {
         }
 
         info!("stream closed, storing old state in etcd...");
-
         let serialized_state =
             serde_json::to_string(&kube.pod_states).expect("unable to serialize pod state");
+
+        debug!("serialized state: {}", serialized_state);
         etcd_client
             .put("kanata/pods", serialized_state, None)
             .await
