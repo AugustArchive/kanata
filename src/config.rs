@@ -4,38 +4,38 @@ use std::collections::HashMap;
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct KanataConfig {
     /// Represents a [`HashMap`] of key-value pairs for the list
-    /// of Instatus component IDs -> pod names. You are not required
+    /// of pod name -> Instatus component ID. You are not required
     /// to include the random hash in the pod (if it is a deployment).
     ///
     /// ```yaml
     /// components:
     ///     # The component ID from instatus, you can also invoke
-    ///     # `kanata list:components` to view a list of the components.
-    ///     some_component_id: nino-prod
+    ///     # `kanata list` to view a list of the components.
+    ///     nino-prod: <instatus id>
     /// ```
-    pub(crate) components: HashMap<String, String>,
+    pub components: HashMap<String, String>,
 
     /// Instatus developer key, you can retrieve it [`here`](https://instatus.com/app/developer)
-    pub(crate) key: String,
+    pub key: String,
 
     /// Returns the [webhook URL](https://instatus.com/help/monitoring/custom-service-webhook), if any. This will post to that endpoint
-    pub(crate) webhook_url: Option<String>,
+    pub webhook_url: Option<String>,
 
     /// Returns the namespace to use. This is required.
-    pub(crate) ns: String,
+    pub ns: String,
 
     /// Returns the etcd configuration.
-    pub(crate) etcd: EtcdConfig,
+    pub etcd: EtcdConfig,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct EtcdConfig {
     /// Returns a list of etcd nodes to connect to.
-    pub(crate) nodes: Vec<String>,
+    pub nodes: Vec<String>,
 
     /// Enables authentication to connect to an etcd node. This
     /// is fairly optional but recommended.
-    pub(crate) auth: Option<(String, String)>,
+    pub auth: Option<(String, String)>,
 }
 
 impl KanataConfig {

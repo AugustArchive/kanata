@@ -1,6 +1,5 @@
 use crate::config::KanataConfig;
 use etcd_client::{Client, ConnectOptions, Error};
-use std::boxed::Box;
 use std::rc::Rc;
 
 /// References a connection for etcd nodes.
@@ -12,9 +11,8 @@ pub struct Etcd {
 
 impl Etcd {
     pub async fn new(config: Rc<KanataConfig>) -> Result<Etcd, Error> {
-        let cfg = config.clone();
-        let connect_opts = if cfg.etcd.auth.is_some() {
-            let (user, pass) = cfg.etcd.auth.as_ref().unwrap();
+        let cfg = Rc::clone(&config);
+        let connect_opts = if let Some((user, pass)) = cfg.etcd.auth.as_ref() {
             Some(ConnectOptions::new().with_user(user, pass))
         } else {
             None

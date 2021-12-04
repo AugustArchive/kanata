@@ -4,67 +4,82 @@ services:
     container_name: kanata
     restart: always
     build: .
-    networks:
-      - kanata
-    volumes:
-      - /run/media/noel/Storage/Projects/Misc/Rust/Kanata/config.yml:/app/kanata/config.yml:ro
-
-  etcd0:
-    image: quay.io/coreos/etcd
-    ports:
-      - 2379
-    volumes:
-      - etcd0_data:/etcd_data
-    command:
+    environment:
+      - RUST_LOG=DEBUG
+    depends_on:
       - etcd
-      - --name=etcd0
-      - --data-dir=/etcd_data
-      - --advertise-client-urls=http://etcd0:2379
-      - --listen-client-urls=http://0.0.0.0:2379
-      - --initial-advertise-peer-urls=http://etcd0:2379
-      - --listen-peer-urls=http://0.0.0.0:2379
-      - --initial-cluster=etcd0=http://etcd0:2380,http://etcd1:2380,http://etcd2:2380
-      - --initial-cluster-state=new
 
-  etcd1:
-    image: quay.io/coreos/etcd
-    ports:
-      - 2380
+      # - etcd0
+      # - etcd1
+      # - etcd2
     volumes:
-      - etcd1_data:/etcd_data
-    command:
-      - etcd
-      - --name=etcd0
-      - --data-dir=/etcd_data
-      - --advertise-client-urls=http://etcd1:2380
-      - --listen-client-urls=http://0.0.0.0:2380
-      - --initial-advertise-peer-urls=http://etcd1:2380
-      - --listen-peer-urls=http://0.0.0.0:2380
-      - --initial-cluster=etcd0=http://etcd0:2379,http://etcd1:2380,http://etcd2:2381
-      - --initial-cluster-state=new
+      - /run/media/noel/Storage/Projects/Misc/Rust/kanata/config.yml:/opt/noel/kanata/config.yml:ro
+      - '~/.kube/config:/root/.kube/config'
 
-  etcd2:
-    image: quay.io/coreos/etcd
-    ports:
-      - 2381
+  etcd:
+    image: bitnami/etcd:latest
+    restart: always
+    container_name: kanata-etcd
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
     volumes:
-      - etcd2_data:/etcd_data
-    command:
-      - etcd
-      - --name=etcd0
-      - --data-dir=/etcd_data
-      - --advertise-client-urls=http://etcd2:2381
-      - --listen-client-urls=http://0.0.0.0:2381
-      - --initial-advertise-peer-urls=http://etcd2:2381
-      - --listen-peer-urls=http://0.0.0.0:2381
-      - --initial-cluster=etcd0=http://etcd0:2379,http://etcd1:2380,http://etcd2:2381
-      - --initial-cluster-state=new
+      - etcd_data:/bitnami/etcd
 
-networks:
-  kanata:
-    internal: true
+  # uncomment this for a etcd cluster
+  # etcd0:
+  #   image: quay.io/coreos/etcd
+  #   ports:
+  #     - 2379
+  #   volumes:
+  #     - etcd0_data:/etcd_data
+  #   command:
+  #     - etcd
+  #     - --name=etcd0
+  #     - --data-dir=/etcd_data
+  #     - --advertise-client-urls=http://etcd0:2379
+  #     - --listen-client-urls=http://0.0.0.0:2379
+  #     - --initial-advertise-peer-urls=http://etcd0:2379
+  #     - --listen-peer-urls=http://0.0.0.0:2379
+  #     - --initial-cluster=etcd0=http://etcd0:2380,http://etcd1:2380,http://etcd2:2380
+  #     - --initial-cluster-state=new
+
+  # etcd1:
+  #   image: quay.io/coreos/etcd
+  #   ports:
+  #     - 2380
+  #   volumes:
+  #     - etcd1_data:/etcd_data
+  #   command:
+  #     - etcd
+  #     - --name=etcd0
+  #     - --data-dir=/etcd_data
+  #     - --advertise-client-urls=http://etcd1:2380
+  #     - --listen-client-urls=http://0.0.0.0:2380
+  #     - --initial-advertise-peer-urls=http://etcd1:2380
+  #     - --listen-peer-urls=http://0.0.0.0:2380
+  #     - --initial-cluster=etcd0=http://etcd0:2379,http://etcd1:2380,http://etcd2:2381
+  #     - --initial-cluster-state=new
+
+  # etcd2:
+  #   image: quay.io/coreos/etcd
+  #   ports:
+  #     - 2381
+  #   volumes:
+  #     - etcd2_data:/etcd_data
+  #   command:
+  #     - etcd
+  #     - --name=etcd0
+  #     - --data-dir=/etcd_data
+  #     - --advertise-client-urls=http://etcd2:2381
+  #     - --listen-client-urls=http://0.0.0.0:2381
+  #     - --initial-advertise-peer-urls=http://etcd2:2381
+  #     - --listen-peer-urls=http://0.0.0.0:2381
+  #     - --initial-cluster=etcd0=http://etcd0:2379,http://etcd1:2380,http://etcd2:2381
+  #     - --initial-cluster-state=new
 
 volumes:
-  etcd0_data:
-  etcd1_data:
-  etcd2_data:
+  etcd_data:
+
+  # etcd0_data:
+  # etcd1_data:
+  # etcd2_data:
