@@ -10,7 +10,7 @@ authors = ["Noel <cutie@floofy.dev>"]
 rocket = { version = "0.5.0-rc.1", default-features = false, features = ["json"] }
 kube = "0.64.0"
 kube-runtime = "0.64.0"
-k8s-openapi = { version = "0.13.1", default-features = false, features = ["v1_22"] }
+k8s-openapi = { version = "0.14.0", default-features = false, features = ["v1_22"] }
 libc = { version = "0.2", default-features = false }
 log = "0.4"
 pretty_env_logger = "0.4"
