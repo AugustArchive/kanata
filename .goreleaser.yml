@@ -1,0 +1,198 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+project_name: ume
+before:
+  hooks:
+    - go mod tidy
+    - go mod download
+
+env:
+  - CGO_ENABLED=0
+  - GO11MODULE=on
+
+builds:
+  - id: "ume"
+    binary: "ume"
+    ldflags:
+      - -s -w -X floof.gay/kanata/internal.Version={{ .Version }} -X floof.gay/kanata/internal.CommitSHA={{ .ShortCommit }} -X floof.gay/kanata/internal.BuildDate={{ .Date }}
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+      - "386"
+      - arm
+    goarm:
+      - "6"
+      - "7"
+    ignore:
+      - goos: windows
+        goarch: arm64
+      - goos: windows
+        goarm: "6"
+      - goos: windows
+        goarm: "7"
+
+dockers:
+  - image_templates:
+      - auguwu/kanata:latest-amd64
+      - auguwu/kanata:{{ .Version }}-amd64
+      - auguwu/kanata:{{ .Major }}.{{ .Minor }}-amd64
+      - ghcr.io/auguwu/kanata:latest
+      - ghcr.io/auguwu/kanata:latest-amd64
+      - ghcr.io/auguwu/kanata:{{ .Version }}-amd64
+      - ghcr.io/auguwu/kanata:{{ .Major }}.{{ .Minor }}-amd64
+    ids:
+      - kanata
+    goarch: amd64
+    build_flag_templates:
+      - --platform=linux/amd64
+      - --label=org.opencontainers.image.title={{ .ProjectName }}
+      - "--label=org.opencontainers.image.description=Automative Kubernetes watcher to view pod phases and reflect them onto popular statuspages."
+      - --label=org.opencontainers.image.source=https://github.com/auguwu/kanata
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --label=org.opencontainers.image.created={{ .Date }}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+      - --label=org.opencontainers.image.licenses=MIT
+    use: buildx
+    extra_files:
+      - docker/docker-entrypoint.sh
+      - docker/runner.sh
+      - docker/scripts/liblog.sh
+
+  - image_templates:
+      - auguwu/kanata:latest-arm64
+      - auguwu/kanata:{{ .Version }}-arm64
+      - auguwu/kanata:{{ .Major }}.{{ .Minor }}-arm64
+      - ghcr.io/auguwu/kanata:latest-arm64
+      - ghcr.io/auguwu/kanata:{{ .Version }}-arm64
+      - ghcr.io/auguwu/kanata:{{ .Major }}.{{ .Minor }}-arm64
+    ids:
+      - ume
+    goarch: arm64
+    goarm: ""
+    build_flag_templates:
+      - --platform=linux/arm64
+      - --label=org.opencontainers.image.title={{ .ProjectName }}
+      - "--label=org.opencontainers.image.description=Automative Kubernetes watcher to view pod phases and reflect them onto popular statuspages."
+      - --label=org.opencontainers.image.source=https://github.com/auguwu/kanata
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --label=org.opencontainers.image.created={{ .Date }}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+      - --label=org.opencontainers.image.licenses=MIT
+    use: buildx
+    extra_files:
+      - docker/docker-entrypoint.sh
+      - docker/runner.sh
+      - docker/scripts/liblog.sh
+
+  - image_templates:
+      - auguwu/kanata:latest-armv7
+      - auguwu/kanata:{{ .Version }}-armv7
+      - auguwu/kanata:{{ .Major }}.{{ .Minor }}-armv7
+      - ghcr.io/auguwu/kanata:latest-armv7
+      - ghcr.io/auguwu/kanata:{{ .Version }}-armv7
+      - ghcr.io/auguwu/kanata:{{ .Major }}.{{ .Minor }}-armv7
+    ids:
+      - ume
+    goarch: arm
+    goarm: "7"
+    build_flag_templates:
+      - --platform=linux/arm/v7
+      - --label=org.opencontainers.image.title={{ .ProjectName }}
+      - "--label=org.opencontainers.image.description=Automative Kubernetes watcher to view pod phases and reflect them onto popular statuspages."
+      - --label=org.opencontainers.image.source=https://github.com/auguwu/kanata
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --label=org.opencontainers.image.created={{ .Date }}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+      - --label=org.opencontainers.image.licenses=MIT
+    use: buildx
+    extra_files:
+      - docker/docker-entrypoint.sh
+      - docker/runner.sh
+      - docker/scripts/liblog.sh
+
+docker_manifests:
+  - name_template: auguwu/kanata:{{ .Version }}
+    image_templates:
+      - auguwu/kanata:{{ .Version }}-amd64
+      - auguwu/kanata:{{ .Version }}-arm64
+      - auguwu/kanata:{{ .Version }}-armv7
+
+  - name_template: ghcr.io/aauguwu/kanata:{{ .Version }}
+    image_templates:
+      - ghcr.io/auguwu/ume:{{ .Version }}-amd64
+      - ghcr.io/auguwu/ume:{{ .Version }}-arm64
+      - ghcr.io/auguwu/ume:{{ .Version }}-armv7
+
+  - name_template: auguwu/kanata:{{ .Major }}.{{ .Minor }}
+    image_templates:
+      - auguwu/kanata:{{ .Major }}.{{ .Minor }}-amd64
+      - auguwu/kanata:{{ .Major }}.{{ .Minor }}-arm64
+      - auguwu/kanata:{{ .Major }}.{{ .Minor }}-armv7
+
+  - name_template: ghcr.io/auguwu/ume:{{ .Major }}.{{ .Minor }}
+    image_templates:
+      - ghcr.io/auguwu/kanata:{{ .Major }}.{{ .Minor }}-amd64
+      - ghcr.io/auguwu/kanata:{{ .Major }}.{{ .Minor }}-arm64
+      - ghcr.io/auguwu/kanata:{{ .Major }}.{{ .Minor }}-armv7
+
+  - name_template: auguwu/ume:latest
+    image_templates:
+      - auguwu/kanata:latest-amd64
+      - auguwu/kanata:latest-arm64
+      - auguwu/kanata:latest-armv7
+
+  - name_template: ghcr.io/auguwu/ume:latest
+    image_templates:
+      - ghcr.io/auguwu/kanata:latest-amd64
+      - ghcr.io/auguwu/kanata:latest-arm64
+      - ghcr.io/auguwu/kanata:latest-armv7
+
+archives:
+  - id: default
+    builds:
+      - ume
+    format_overrides:
+      - goos: windows
+        format: zip
+    replacements:
+      windows: windows
+      darwin: darwin
+      386: i386
+      amd64: x86_64
+
+brews:
+  - goarm: "6"
+    tap:
+      owner: Noelware
+      name: homebrew-tap
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    commit_author:
+      name: "Noel"
+      email: "cutie@floofy.dev"
+    homepage: https://github.com/auguwu/kanata
+    description: Automative Kubernetes watcher to view pod phases and reflect them onto popular statuspages.
+    commit_msg_template: "update: {{ .ProjectName }} to v{{ .Version }} :sparkles:"
+
+signs:
+  - artifacts: checksum
+
+checksum:
+  name_template: "checksums.txt"
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-SNAPSHOT"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+
+release:
+  github:
+    owner: auguwu
+    name: kanata
