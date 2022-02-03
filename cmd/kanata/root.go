@@ -20,3 +20,39 @@
 // SOFTWARE.
 
 package kanata
+
+import "github.com/spf13/cobra"
+
+var (
+	rootCmd = &cobra.Command{
+		Use:   "kanata",
+		Short: "Automative Kubernetes watcher to view pod phases and reflect them onto popular statuspages.",
+		RunE:  run,
+	}
+
+	configFilePath string
+	debug          bool
+)
+
+func run(_ *cobra.Command, _ []string) error {
+	return nil
+}
+
+func init() {
+	rootCmd.Flags().StringVarP(&configFilePath, "config", "c", "./config.toml", "the configuration file path to use")
+	rootCmd.Flags().BoolVarP(&debug, "debug", "d", false, "if debug logs should be used. over-ridden if `debug` in config.toml exists.")
+	rootCmd.AddCommand(
+		newValidateCommand(),
+		newGenerateCommand(),
+		newPingCommand(),
+	)
+}
+
+// Execute runs the root cobra.Command
+func Execute() int {
+	if err := rootCmd.Execute(); err != nil {
+		return 1
+	}
+
+	return 0
+}

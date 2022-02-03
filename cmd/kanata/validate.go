@@ -20,3 +20,16 @@
 // SOFTWARE.
 
 package kanata
+
+import "github.com/spf13/cobra"
+
+func newValidateCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:          "validate <filename.toml>",
+		Short:        "Validates the configuration file and returns a error if there is anything wrong with it.",
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return nil
+		},
+	}
+}

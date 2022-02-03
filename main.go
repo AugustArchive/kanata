@@ -20,3 +20,13 @@
 // SOFTWARE.
 
 package main
+
+import (
+	"floof.gay/kanata/cmd/kanata"
+	"os"
+)
+
+func main() {
+	code := kanata.Execute()
+	os.Exit(code)
+}

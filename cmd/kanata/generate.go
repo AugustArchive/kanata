@@ -20,3 +20,16 @@
 // SOFTWARE.
 
 package kanata
+
+import "github.com/spf13/cobra"
+
+func newGenerateCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:          "generate [filename.toml]",
+		Short:        "Generates a configuration file in directory it is running in.",
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return nil
+		},
+	}
+}

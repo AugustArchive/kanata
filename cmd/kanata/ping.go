@@ -20,3 +20,16 @@
 // SOFTWARE.
 
 package kanata
+
+import "github.com/spf13/cobra"
+
+func newPingCommand() *cobra.Command {
+	return &cobra.Command{
+		Use:          "generate [--daemon/-d | --http/-h]",
+		Short:        "Pings the daemon or HTTP service and returns the latency in milliseconds",
+		SilenceUsage: true,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return nil
+		},
+	}
+}
