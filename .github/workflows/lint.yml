@@ -86,13 +86,15 @@ jobs:
         if: ${{ github.event_name == 'push' }}
         run: |
           if [ -n "$(git status --porcelain)" ]; then
-              echo '::set-output name=STATUS_DIRTY::true'
+              echo '::set-output name=DIRTY::true'
           else
-            echo '::set-output name=STATUS_DIRTY::false'
+            echo '::set-output name=DIRTY::false'
           fi
 
       - name: Commit changes (if dirty)
-        if: contains(steps.git_status.outputs.STATUS_DIRTY, 'true') && ${{ github.event_name == 'push' }}
+        if: |
+          contains(steps.git_status.outputs.DIRTY, 'true') &&
+          ${{ github.event_name == 'push' }}
         run: |
           git config --global user.name "Noel[bot]"
           git config --global user.email "noelbot@users.noreply.github.com"
