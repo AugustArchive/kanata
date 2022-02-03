@@ -1,0 +1,22 @@
+run:
+  tests: false
+
+output:
+  format: colored-line-number
+
+linters:
+  enable:
+    - bodyclose
+    - dupl
+    - exportloopref
+    - goconst
+    - goprintffuncname
+    - gosec
+    - ifshort
+    - misspell
+    - prealloc
+    - rowserrcheck
+    - sqlclosecheck
+    - unconvert
+    - unparam
+    - whitespace
